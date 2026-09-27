@@ -1,5 +1,5 @@
 {
-  "name": "@revido/mailpit-mcp",
+  "name": "@revido-llc/mailpit-mcp",
   "version": "1.0.0",
   "description": "Mailpit helper package and MCP server for Revido projects",
   "type": "module",

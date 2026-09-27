@@ -13,6 +13,9 @@
     "dev": "tsc --watch",
     "mcp": "node dist/mcp.js"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "nodemailer": "^6.9.0"

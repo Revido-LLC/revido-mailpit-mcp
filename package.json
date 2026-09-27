@@ -1,0 +1,25 @@
+{
+  "name": "@revido/mailpit-mcp",
+  "version": "1.0.0",
+  "description": "Mailpit helper package and MCP server for Revido projects",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "revido-mailpit-mcp": "./dist/mcp.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "mcp": "node dist/mcp.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "nodemailer": "^6.9.0"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

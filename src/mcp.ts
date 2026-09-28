@@ -95,7 +95,6 @@ httpServer.listen(port, () => {
   console.log(`MCP Streamable HTTP Server listening on port ${port}`)
 })
 
-process.on('SIGINT', async () => {
-  await transport.close()
+process.on('SIGINT', () => {
   httpServer.close()
 })

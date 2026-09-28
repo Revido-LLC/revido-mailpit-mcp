@@ -1,5 +1,6 @@
+import { createServer, type IncomingMessage } from 'node:http'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { z } from 'zod'
 import { makeAddress, waitForEmail, extractCode, cleanup } from './helper.js'
 import type { MailpitConfig } from './client.js'
@@ -49,5 +50,50 @@ server.tool('cleanup', 'Delete emails for a specific test address only.', {
   return { content: [{ type: 'text', text: `Cleaned up emails for ${address}` }] }
 })
 
-const transport = new StdioServerTransport()
-await server.connect(transport)
+function readBody(req: IncomingMessage): Promise<unknown> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = []
+    req.on('data', chunk => chunks.push(Buffer.from(chunk)))
+    req.on('end', () => {
+      if (chunks.length === 0) {
+        resolve(undefined)
+        return
+      }
+
+      try {
+        resolve(JSON.parse(Buffer.concat(chunks).toString('utf8')))
+      } catch (error) {
+        reject(error)
+      }
+    })
+    req.on('error', reject)
+  })
+}
+
+const port = Number.parseInt(process.env.PORT || '3000', 10)
+if (!Number.isInteger(port) || port < 1 || port > 65535) {
+  throw new Error(`Invalid PORT value: ${process.env.PORT}`)
+}
+
+const httpServer = createServer(async (req, res) => {
+  try {
+    const body = req.method === 'POST' ? await readBody(req) : undefined
+    const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined })
+    await server.connect(transport)
+    await transport.handleRequest(req, res, body)
+  } catch (error) {
+    console.error('Error handling HTTP request:', error)
+    if (!res.headersSent) {
+      res.writeHead(500, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ error: 'Internal server error' }))
+    }
+  }
+})
+
+httpServer.listen(port, () => {
+  console.log(`MCP Streamable HTTP Server listening on port ${port}`)
+})
+
+process.on('SIGINT', () => {
+  httpServer.close()
+})

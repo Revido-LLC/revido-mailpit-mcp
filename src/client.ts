@@ -1,4 +1,4 @@
-import https from 'https'
+import http from 'http'
 
 export interface MailpitConfig {
   host: string
@@ -30,23 +30,20 @@ export interface MailpitMessagesResponse {
 export class MailpitClient {
   private baseUrl: string
   private auth: string
-  private agent = new https.Agent({ rejectUnauthorized: false })
-
   constructor(private config: MailpitConfig) {
-    this.baseUrl = `https://${config.host}/api/v1`
+    this.baseUrl = `http://${config.host}:8025/api/v1`
     this.auth = 'Basic ' + Buffer.from(`${config.apiUser}:${config.apiPass}`).toString('base64')
   }
 
   private request(url: string, method = 'GET'): Promise<{ statusCode: number; body: string }> {
     return new Promise((resolve, reject) => {
       const parsedUrl = new URL(url)
-      const req = https.request({
+      const req = http.request({
         hostname: parsedUrl.hostname,
         port: parsedUrl.port,
         path: `${parsedUrl.pathname}${parsedUrl.search}`,
         method,
-        headers: { Authorization: this.auth },
-        agent: this.agent
+        headers: { Authorization: this.auth }
       }, res => {
         const chunks: Buffer[] = []
         res.on('data', chunk => chunks.push(Buffer.from(chunk)))

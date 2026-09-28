@@ -31,7 +31,6 @@ export declare class MailpitClient {
     private config;
     private baseUrl;
     private auth;
-    private agent;
     constructor(config: MailpitConfig);
     private request;
     getMessages(query?: string): Promise<MailpitMessagesResponse>;

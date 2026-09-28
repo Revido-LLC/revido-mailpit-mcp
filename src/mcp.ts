@@ -70,9 +70,6 @@ function readBody(req: IncomingMessage): Promise<unknown> {
   })
 }
 
-const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined })
-await server.connect(transport)
-
 const port = Number.parseInt(process.env.PORT || '3000', 10)
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
   throw new Error(`Invalid PORT value: ${process.env.PORT}`)
@@ -81,6 +78,8 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 const httpServer = createServer(async (req, res) => {
   try {
     const body = req.method === 'POST' ? await readBody(req) : undefined
+    const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined })
+    await server.connect(transport)
     await transport.handleRequest(req, res, body)
   } catch (error) {
     console.error('Error handling HTTP request:', error)
